@@ -1,6 +1,6 @@
 /**
  * Marlin 3D Printer Firmware
- * Copyright (C) 2016 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
+ * Copyright (C) 2019 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
  *
  * Based on Sprinter and grbl.
  * Copyright (C) 2011 Camiel Gubbels / Erik van der Zalm
@@ -66,7 +66,7 @@
 #ifdef IS_RAMPS_13
   #define SERVO0_PIN        7   // RAMPS_13 // Will conflict with BTN_EN2 on LCD_I2C_VIKI
 #else
-  #define SERVO0_PIN       11
+  #define SERVO0_PIN       19
 #endif
 #define SERVO1_PIN          6
 #define SERVO2_PIN          5
@@ -79,10 +79,10 @@
 //
 #define X_MIN_PIN           3
 #ifndef X_MAX_PIN
-  #define X_MAX_PIN         2
+  #define X_MAX_PIN         //2
 #endif
-#define Y_MIN_PIN          14
-#define Y_MAX_PIN          15
+#define Y_MIN_PIN          2//14
+#define Y_MAX_PIN          //15
 #define Z_MIN_PIN          18
 #define Z_MAX_PIN          19
 
