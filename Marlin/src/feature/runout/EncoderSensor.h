@@ -21,7 +21,9 @@
  */
 #pragma once
 
-#include "DIOFilamentSensorBase.h"
+#include "DIFilamentSensorBase.h"
+#include "../../module/motion.h"
+#include "../../module/stepper.h"
 
 /**
  * This sensor uses a magnetic encoder disc and a Hall effect
@@ -29,38 +31,79 @@
  * will toggle between 0 and 1 on filament movement. It can detect
  * filament runout and stripouts or jams.
  */
-class FilamentSensorEncoder : public FilamentSensorBase {
+class FilamentSensorEncoder : private DIFilamentSensorBase {
   private:
-    static uint8_t motion_detected;
+    #define ActiveExtruderSensor()  MIN(active_extruder, NUM_RUNOUT_SENSORS - 1)
 
-    static inline void poll_motion_sensor() {
-      static uint8_t old_state;
-      const uint8_t new_state = poll_runout_pins(),
-                    change    = old_state ^ new_state;
+    constexpr static float sensorResolution =
+      #ifdef SENSOR_RESOLUTION
+        SENSOR_RESOLUTION
+      #else
+        2.5
+      #endif
+    ;
+
+    static uint8_t old_state, changed, cnt, motion_detected;
+    #if ENABLED(DISTINCT_E_FACTORS)
+      static int16_t resolutionSteps[NUM_RUNOUT_SENSORS];
+    #else
+      static int16_t resolutionSteps[1];
+    #endif
+
+  public:
+    static inline bool setup() {
+      DIFilamentSensorBase::setup();
+      initResolutionSteps();
+      return true;
+    }
+
+    static inline void initResolutionSteps() {
+      #if ENABLED(DISTINCT_E_FACTORS)
+        for (uint8_t e = 0; e < NUM_RUNOUT_SENSORS; ++e)
+      #else
+        constexpr static uint8_t e = 0;
+      #endif
+          resolutionSteps[e] = (int16_t)(sensorResolution * planner.settings.axis_steps_per_mm[E_AXIS+e] * 2 / 3);
+    }
+
+    static inline int16_t getResolutionSteps() {
+      #if ENABLED(DISTINCT_E_FACTORS)
+        return resolutionSteps[ActiveExtruderSensor()];
+      #else
+        return resolutionSteps[0];
+      #endif
+    }
+
+    static inline void reset() {
+      old_state = poll_runout_pins();
+      motion_detected = _BV(NUM_RUNOUT_SENSORS) - 1;
+      changed = cnt = 0;
+    }
+
+    static inline void checkMotion() {
+      const uint8_t new_state = poll_runout_pins();
+      changed |= old_state ^ new_state;
       old_state = new_state;
 
-      #ifdef FILAMENT_RUNOUT_SENSOR_DEBUG
+      #ifdef FILAMENT_SENSOR_DEBUG
         if (change) {
           SERIAL_ECHOPGM("Motion detected:");
-          for (uint8_t e = 0; e < NUM_RUNOUT_SENSORS; e++)
-            if (TEST(change, e)) { SERIAL_CHAR(' '); SERIAL_CHAR('0' + e); }
+          for (uint8_t e = 0; e < NUM_RUNOUT_SENSORS; ++e)
+            if (TEST(changed, e)) {
+              SERIAL_CHAR(' ');
+              SERIAL_CHAR('0' + e);
+            }
           SERIAL_EOL();
         }
       #endif
 
-      motion_detected |= change;
+      if (++cnt >= 2) {
+        motion_detected = changed;
+        changed = cnt = 0;
+      }
     }
 
-  public:
-    static inline void block_completed(const block_t* const b) {
-      // If the sensor wheel has moved since the last call to
-      // this method reset the runout counter for the extruder.
-      if (TEST(motion_detected, b->extruder))
-        filament_present(b->extruder);
-
-      // Clear motion triggers for next block
-      motion_detected = 0;
+    static inline bool getRunoutState() {
+      return !TEST(motion_detected, ActiveExtruderSensor());
     }
-
-    static inline void run() { poll_motion_sensor(); }
 };

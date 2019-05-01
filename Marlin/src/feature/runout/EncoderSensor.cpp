@@ -22,8 +22,18 @@
 
 #include "../../inc/MarlinConfigPre.h"
 
-#if ENABLED(FILAMENT_MOTION_SENSOR)
+#if FRS(ENCODER)
 
-uint8_t FilamentSensorEncoder::motion_detected;
+#include "EncoderSensor.h"
+
+uint8_t FilamentSensorEncoder::old_state,
+        FilamentSensorEncoder::changed,
+        FilamentSensorEncoder::cnt,
+        FilamentSensorEncoder::motion_detected;
+#if ENABLED(DISTINCT_E_FACTORS)
+  int16_t FilamentSensorEncoder::resolutionSteps[NUM_RUNOUT_SENSORS];
+#else
+  int16_t FilamentSensorEncoder::resolutionSteps[1];
+#endif
 
 #endif

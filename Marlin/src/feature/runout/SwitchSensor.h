@@ -21,18 +21,29 @@
  */
 #pragma once
 
-#include "DIOFilamentSensorBase.h"
+#include "DIFilamentSensorBase.h"
+#include "../../module/motion.h"
 
 /**
  * This is a simple endstop switch in the path of the filament.
  * It can detect filament runout, but not stripouts or jams.
  */
-class FilamentSensorSwitch : public FilamentSensorBase {
+class FilamentSensorSwitch : private DIFilamentSensorBase {
   private:
-    static inline bool poll_runout_state(const uint8_t extruder) {
+    // Return a bitmask of runout flag states (bits set always indicates runout)
+    static inline uint8_t poll_runout_states() {
+      return poll_runout_pins() ^ uint8_t(
+        #if DISABLED(FIL_RUNOUT_INVERTING)
+          _BV(NUM_RUNOUT_SENSORS) - 1
+        #else
+          0
+        #endif
+      );
+    }
+
+    static inline bool poll_runout_state() {
       const uint8_t runout_states = poll_runout_states();
       #if NUM_RUNOUT_SENSORS == 1
-        UNUSED(extruder);
         return runout_states;                     // A single sensor applying to all extruders
       #else
         #if ENABLED(DUAL_X_CARRIAGE)
@@ -44,17 +55,25 @@ class FilamentSensorSwitch : public FilamentSensorBase {
             return runout_states;                 // Any extruder
           else
         #endif
-            return TEST(runout_states, extruder); // Specific extruder
+            return TEST(runout_states, active_extruder); // Specific extruder
       #endif
     }
 
   public:
-    static inline void block_completed(const block_t* const b) { UNUSED(b); }
+    static inline bool setup() {
+      DIFilamentSensorBase::setup();
+      return true;
+    }
 
-    static inline void run() {
-      const bool out = poll_runout_state(active_extruder);
-      if (!out) filament_present(active_extruder);
-      #ifdef FILAMENT_RUNOUT_SENSOR_DEBUG
+    #if FILAMENT_RUNOUT_DISTANCE_MM > 0
+      static inline int16_t getResolutionSteps() { return 0; }    // Can detect presence so 0 step resolution
+    #endif
+
+    static inline void reset() {}
+
+    static inline bool getRunoutState() {
+      const bool out = poll_runout_state();
+      #ifdef FILAMENT_SENSOR_DEBUG
         static bool was_out = false;
         if (out != was_out) {
           was_out = out;
@@ -62,5 +81,7 @@ class FilamentSensorSwitch : public FilamentSensorBase {
           serialprintPGM(out ? PSTR("OUT\n") : PSTR("IN\n"));
         }
       #endif
+
+      return out;
     }
 };

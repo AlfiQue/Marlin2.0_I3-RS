@@ -19,31 +19,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+#pragma once
 
-/**
- * feature/runout.cpp - Runout sensor support
- */
+#include "../inc/MarlinConfig.h"
 
-#include "../inc/MarlinConfigPre.h"
-
-#if HAS_FILAMENT_SENSOR
-
-#include "runout.h"
-
-FilamentMonitor runout;
-
-bool FilamentMonitorBase::enabled = true,
-     FilamentMonitorBase::filament_ran_out;
-
-#if ENABLED(HOST_ACTION_COMMANDS)
-  bool FilamentMonitorBase::host_handling;
-#endif
-
-#if HAS_DELAYED_RUNOUT
-  int16_t FilamentMonitorBase::st_cnt;
-  float RunoutResponseDelayed::runoutDistance;
-#else
-  int8_t RunoutResponseDebounced::runout_count;
-#endif
-
-#endif // HAS_FILAMENT_SENSOR
+void swi2c_init(void);
+uint8_t swi2c_read(void);
+void swi2c_write(const uint8_t data);
+bool swi2c_readByte_A8(const uint8_t dev_addr, const uint8_t addr, uint8_t* pbyte);
+bool swi2c_writeByte_A8(const uint8_t dev_addr, const uint8_t addr, const uint8_t data);

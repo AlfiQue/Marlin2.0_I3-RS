@@ -867,10 +867,6 @@ void setup() {
     #endif
   #endif
 
-  #if HAS_FILAMENT_SENSOR
-    runout.setup();
-  #endif
-
   setup_killpin();
 
   setup_powerhold();
@@ -897,12 +893,6 @@ void setup() {
 
   SERIAL_ECHOLNPGM("start");
   SERIAL_ECHO_START();
-
-  #if ENABLED(FILAMENT_RUNOUT_SENSOR)
-    runout.setup();
-  #endif
-
-
 
   #if TMC_HAS_SPI
     #if DISABLED(TMC_USE_SW_SPI)
@@ -942,6 +932,10 @@ void setup() {
 
   SERIAL_ECHO_START();
   SERIAL_ECHOLNPAIR(MSG_FREE_MEMORY, freeMemory(), MSG_PLANNER_BUFFER_BYTES, (int)sizeof(block_t) * (BLOCK_BUFFER_SIZE));
+
+  #if HAS_FILAMENT_SENSOR
+    runout.setup();
+  #endif
 
   queue_setup();
 

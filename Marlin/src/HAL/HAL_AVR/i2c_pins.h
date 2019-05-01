@@ -19,31 +19,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+#pragma once
 
 /**
- * feature/runout.cpp - Runout sensor support
+ * Define I2C Pins: SCL, SDA
  */
-
-#include "../inc/MarlinConfigPre.h"
-
-#if HAS_FILAMENT_SENSOR
-
-#include "runout.h"
-
-FilamentMonitor runout;
-
-bool FilamentMonitorBase::enabled = true,
-     FilamentMonitorBase::filament_ran_out;
-
-#if ENABLED(HOST_ACTION_COMMANDS)
-  bool FilamentMonitorBase::host_handling;
+#if defined(__AVR_ATmega168__) || defined(__AVR_ATmega328__) || defined(__AVR_ATmega328P__)
+  #define AVR_SCL_PIN -1
+  #define AVR_SDA_PIN -1
+#elif defined(__AVR_ATmega644__) || defined(__AVR_ATmega644P__) || defined(__AVR_ATmega644PA__) || defined(__AVR_ATmega1284P__)
+  #define AVR_SCL_PIN -1
+  #define AVR_SDA_PIN -1
+#elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+  #define AVR_SCL_PIN 21
+  #define AVR_SDA_PIN 20
+#elif defined(__AVR_AT90USB1287__) || defined(__AVR_AT90USB1286__) || defined(__AVR_AT90USB646__) || defined(__AVR_AT90USB647__)
+  #define AVR_SCL_PIN -1
+  #define AVR_SDA_PIN -1
+#elif defined(__AVR_ATmega1281__) || defined(__AVR_ATmega2561__)
+  #define AVR_SCL_PIN -1
+  #define AVR_SDA_PIN -1
 #endif
 
-#if HAS_DELAYED_RUNOUT
-  int16_t FilamentMonitorBase::st_cnt;
-  float RunoutResponseDelayed::runoutDistance;
-#else
-  int8_t RunoutResponseDebounced::runout_count;
+#ifndef SCL_PIN
+  #define SCL_PIN AVR_SCL_PIN
 #endif
-
-#endif // HAS_FILAMENT_SENSOR
+#ifndef SDA_PIN
+  #define SDA_PIN AVR_SDA_PIN
+#endif
