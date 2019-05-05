@@ -113,7 +113,7 @@ Stepper stepper; // Singleton
   #include "../feature/mixing.h"
 #endif
 
-#if HAS_DELAYED_RUNOUT
+#ifdef FILAMENT_RUNOUT_DISTANCE_MM
   #include "../feature/runout.h"
 #endif
 
@@ -218,10 +218,6 @@ volatile int32_t Stepper::endstops_trigsteps[XYZ];
 
 volatile int32_t Stepper::count_position[NUM_AXIS] = { 0 };
 int8_t Stepper::count_direction[NUM_AXIS] = { 0, 0, 0, 0 };
-
-#if HAS_DELAYED_RUNOUT
-  int16_t fsensor_counter = 0;
-#endif
 
 #define DUAL_ENDSTOP_APPLY_STEP(A,V)                                                                                        \
   if (separate_multi_axis) {                                                                                                \
@@ -1302,7 +1298,7 @@ void Stepper::isr() {
     ;
 
     // Limit the value to the maximum possible value of the timer
-    NOMORE(interval, HAL_TIMER_TYPE_MAX);
+    NOMORE(interval, uint32_t(HAL_TIMER_TYPE_MAX));
 
     // Compute the time remaining for the main isr
     nextMainISR -= interval;
@@ -1412,10 +1408,6 @@ void Stepper::stepper_pulse_phase_isr() {
 
   // Just update the value we will get at the end of the loop
   step_events_completed += events_to_do;
-  #if HAS_DELAYED_RUNOUT
-    // Add E steps to filament runout control
-    fsensor_counter += events_to_do;
-  #endif
 
   // Get the timer count and estimate the end of the pulse
   hal_timer_t pulse_end = HAL_timer_get_count(PULSE_TIMER_NUM) + hal_timer_t(MIN_PULSE_TICKS);
@@ -1545,9 +1537,8 @@ uint32_t Stepper::stepper_block_phase_isr() {
 
     // If current block is finished, reset pointer
     if (step_events_completed >= step_event_count) {
-      #if HAS_DELAYED_RUNOUT
-        runout.block_chunk(current_block, fsensor_counter);
-        fsensor_counter = 0;
+      #ifdef FILAMENT_RUNOUT_DISTANCE_MM
+        runout.block_completed(current_block);
       #endif
       axis_did_move = 0;
       current_block = NULL;
@@ -1555,12 +1546,6 @@ uint32_t Stepper::stepper_block_phase_isr() {
     }
     else {
       // Step events not completed yet...
-      #if HAS_DELAYED_RUNOUT
-        if (fsensor_counter >= runout.sensorResolutionSteps()) {
-          runout.block_chunk(current_block, fsensor_counter);
-          fsensor_counter = 0;
-        }
-      #endif
 
       // Are we in acceleration phase ?
       if (step_events_completed <= accelerate_until) { // Calculate new timer value
@@ -1783,10 +1768,6 @@ uint32_t Stepper::stepper_block_phase_isr() {
 
       // No step events completed so far
       step_events_completed = 0;
-      #if HAS_DELAYED_RUNOUT
-        fsensor_counter = 0;
-        runout.block_begin(current_block);
-      #endif
 
       // Compute the acceleration and deceleration points
       accelerate_until = current_block->accelerate_until << oversampling;
@@ -1916,14 +1897,6 @@ uint32_t Stepper::stepper_block_phase_isr() {
     hal_timer_t pulse_end = HAL_timer_get_count(PULSE_TIMER_NUM) + hal_timer_t(MIN_PULSE_TICKS);
 
     const hal_timer_t added_step_ticks = hal_timer_t(ADDED_STEP_TICKS);
-
-    #if HAS_DELAYED_RUNOUT
-      // Add LA E steps to filament runout control
-      if (LA_steps < 0)
-        fsensor_counter -= LA_steps;
-      else
-        fsensor_counter += LA_steps;
-    #endif
 
     // Step E stepper if we have steps
     while (LA_steps) {
