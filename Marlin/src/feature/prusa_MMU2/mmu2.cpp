@@ -47,7 +47,7 @@ MMU2 mmu2;
 
 #define MMU_TODELAY 100
 #define MMU_TIMEOUT 10
-#define MMU_CMD_TIMEOUT 60000ul //5min timeout for mmu commands (except P0)
+#define MMU_CMD_TIMEOUT 120000ul //5min timeout for mmu commands (except P0)
 #define MMU_P0_TIMEOUT 3000ul //timeout for P0 command: 3seconds
 
 #define MMU_CMD_NONE 0

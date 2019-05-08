@@ -454,9 +454,9 @@
                                   // is more than PID_FUNCTIONAL_RANGE then the PID will be shut off and the heater will be set to min/max.
 
   // If you are using a pre-configured hotend then you can use one of the value sets by uncommenting it
-  #define DEFAULT_Kp 31.80
-  #define DEFAULT_Ki 3.5
-  #define DEFAULT_Kd 72.28
+  #define DEFAULT_Kp 83.62 //31.80
+  #define DEFAULT_Ki 13.98 //3.5
+  #define DEFAULT_Kd 125.01 //72.28
 
 
   // Ultimaker
@@ -511,9 +511,9 @@
 
   //120V 250W silicone heater into 4mm borosilicate (MendelMax 1.5+)
   //from FOPDT model - kp=.39 Tp=405 Tdead=66, Tc set to 79.2, aggressive factor of .15 (vs .1, 1, 10)
-  #define DEFAULT_bedKp 10.00
-  #define DEFAULT_bedKi .023
-  #define DEFAULT_bedKd 305.4
+  #define DEFAULT_bedKp 399.60 //10.00
+  #define DEFAULT_bedKi 56.72 //.023
+  #define DEFAULT_bedKd 703.79 //305.4
 
   //120V 250W silicone heater into 4mm borosilicate (MendelMax 1.5+)
   //from pidautotune
