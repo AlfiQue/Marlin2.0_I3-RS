@@ -40,7 +40,7 @@
   #include "pause.h"
 #endif
 
-//#define FILAMENT_RUNOUT_SENSOR_DEBUG
+#define FILAMENT_RUNOUT_SENSOR_DEBUG
 
 class FilamentMonitorBase {
   public:

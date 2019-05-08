@@ -1344,18 +1344,18 @@
   #define PAUSE_PARK_RETRACT_FEEDRATE         60  // (mm/s) Initial retract feedrate.
   #define PAUSE_PARK_RETRACT_LENGTH            2  // (mm) Initial retract.
                                                   // This short retract is done immediately, before parking the nozzle.
-  #define FILAMENT_CHANGE_UNLOAD_FEEDRATE     10  // (mm/s) Unload filament feedrate. This can be pretty fast.
+  #define FILAMENT_CHANGE_UNLOAD_FEEDRATE     60  // (mm/s) Unload filament feedrate. This can be pretty fast.
   #define FILAMENT_CHANGE_UNLOAD_ACCEL        25  // (mm/s^2) Lower acceleration may allow a faster feedrate.
-  #define FILAMENT_CHANGE_UNLOAD_LENGTH      100  // (mm) The length of filament for a complete unload.
+  #define FILAMENT_CHANGE_UNLOAD_LENGTH      620  // (mm) The length of filament for a complete unload.
                                                   //   For Bowden, the full length of the tube and nozzle.
                                                   //   For direct drive, the full length of the nozzle.
                                                   //   Set to 0 for manual unloading.
   #define FILAMENT_CHANGE_SLOW_LOAD_FEEDRATE   6  // (mm/s) Slow move when starting load.
   #define FILAMENT_CHANGE_SLOW_LOAD_LENGTH     0  // (mm) Slow length, to allow time to insert material.
                                                   // 0 to disable start loading and skip to fast load only
-  #define FILAMENT_CHANGE_FAST_LOAD_FEEDRATE   6  // (mm/s) Load filament feedrate. This can be pretty fast.
+  #define FILAMENT_CHANGE_FAST_LOAD_FEEDRATE  60  // (mm/s) Load filament feedrate. This can be pretty fast.
   #define FILAMENT_CHANGE_FAST_LOAD_ACCEL     25  // (mm/s^2) Lower acceleration may allow a faster feedrate.
-  #define FILAMENT_CHANGE_FAST_LOAD_LENGTH     0  // (mm) Load length of filament, from extruder gear to nozzle.
+  #define FILAMENT_CHANGE_FAST_LOAD_LENGTH   580  // (mm) Load length of filament, from extruder gear to nozzle.
                                                   //   For Bowden, the full length of the tube and nozzle.
                                                   //   For direct drive, the full length of the nozzle.
   //#define ADVANCED_PAUSE_CONTINUOUS_PURGE       // Purge continuously up to the purge length until interrupted.
@@ -2318,7 +2318,7 @@
     #define MMU2_LOAD_TO_NOZZLE_SEQUENCE \
       {  7.2,  562 }, \
       { 14.4,  871 }, \
-      { 36.0, 1393 }, \
+      { 555.0, 1393 }, \
       { 14.4,  871 }, \
       { 50.0,  198 }
 
@@ -2333,7 +2333,7 @@
       {  -6.0,  600 }, \
       {  10.0,  700 }, \
       { -10.0,  400 }, \
-      { -50.0, 2000 }
+      { -680.0, 2000 }
 
   #endif
 
@@ -2353,14 +2353,6 @@
   //#define SERVICE_INTERVAL_2  200 // print hours
   //#define SERVICE_NAME_3      "Service 3"
   //#define SERVICE_INTERVAL_3    1 // print hours
-#endif
-
-// @section runout
-#if FRS(ENCODER) || FRS(FRS_PAT9125)
-  /**
-   * Used to override default motion sensors resolution
-   */
-  //#define SENSOR_RESOLUTION           // Sensor resolution override (mm)
 #endif
 
 // @section develop
